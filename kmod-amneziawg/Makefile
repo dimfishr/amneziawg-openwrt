@@ -1,10 +1,18 @@
 include $(TOPDIR)/rules.mk
 
-include $(INCLUDE_DIR)/kernel.mk
-
 PKG_NAME:=kmod-amneziawg
 PKG_RELEASE:=$(AUTORELEASE)
 
+PKG_SOURCE_URL:=https://github.com/dimfishr/wolf-wireguard-kernel.git
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_DATE:=2025-02-28
+PKG_SOURCE_VERSION:=ab46f8c5c1842304b431861a8bf0d56322a98a04
+PKG_MIRROR_HASH:=baf216926e12b634a24819e648e5d008e011163c527e705030030979c5b5d1ea
+
+PKG_BUILD_PARALLEL:=1
+PKG_FLAGS:=nonshared
+
+include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/amneziawg
@@ -17,27 +25,15 @@ define KernelPackage/amneziawg
 	FILES:=$(PKG_BUILD_DIR)/amneziawg.ko
 	DEPENDS:= \
 		+kmod-udptunnel4 \
-		+IPV6:kmod-udptunnel6 \
-		+kmod-crypto-lib-chacha20poly1305 \
-		+kmod-crypto-lib-curve25519
-	AUTOLOAD:=$(call AutoProbe,amneziawg)
-endef
-
-define Build/Prepare
-	cp -fr $(LINUX_DIR)/drivers/net/wireguard/{*.c,*.h,selftest/} $(PKG_BUILD_DIR)
-	mkdir -p $(PKG_BUILD_DIR)/uapi
-	cp -f $(LINUX_DIR)/include/uapi/linux/wireguard.h $(PKG_BUILD_DIR)/uapi/
-	for patch in `ls files/*`; do \
-		patch -d $(PKG_BUILD_DIR)/ -F3 -t -p0 -i "$$$$(pwd)/$$$${patch}"; \
-	done
-	cp -f src/Makefile $(PKG_BUILD_DIR)
+		+IPV6:kmod-udptunnel6
+  AUTOLOAD:=$(call AutoLoad,31,amneziawg,1)
 endef
 
 define Build/Compile
-	$(MAKE) -C "$(LINUX_DIR)" \
-		$(KERNEL_MAKE_FLAGS) \
+	+$(KERNEL_MAKE) $(PKG_JOBS) \
+		-C "$(LINUX_DIR)" \
 		M="$(PKG_BUILD_DIR)" \
-		EXTRA_CFLAGS="$(BUILDFLAGS)" \
+		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
 		modules
 endef
 
