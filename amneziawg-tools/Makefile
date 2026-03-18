@@ -8,6 +8,7 @@ PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/amnezia-vpn/amneziawg-tools.git
 # Version: latest stable release tag
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
+PKG_MIRROR_HASH:=0c27841a3b4860c7fd085cd627c5b0f9c25653afdaef1e73fd3e350fb3445dab
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=COPYING
